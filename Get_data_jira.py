@@ -7,15 +7,14 @@ from jira.client import ResultList
 from jira.resources import Issue
 import requests
 from datetime import datetime
-
+from Parse_word import date_start, date_end, name_act, key_project_act  #передаем данные из акта
 
 jira = JIRA(server='https://jira.i-sol.eu', basic_auth=('tcontrol', '1J*iBJGT'))
 
 
 #------------------------ Ввод ФИО---------------------
-date1 = '01.08.2023'
-date2 = '31.08.2023'
-
+date1 = date_start
+date2 = date_end
 date1 = date1.replace('.', '/')
 date2 = date2.replace('.', '/')
 date1 = datetime.strptime(date1, "%d/%m/%Y")
@@ -23,15 +22,16 @@ date2 = datetime.strptime(date2, "%d/%m/%Y")
 print(date1)
 print(date2)
 #name_user = input('Введите Фамилию и Имя: \n')
-name_user = "Девятайкина Анна"
+name_user = name_act
 name_user = name_user.replace(" ", "")
 #name_project = input('Введите ключ проекта: \n')
-name_project = 'EVRAZTMC'
+name_project = key_project_act
 
 #----------------------- получение задач проекта-----------------------
 issues_in_proj = jira.search_issues(f'project={name_project}')
-proj = jira.project('EVRAZTMC')
 
+
+proj = jira.project(key_project_act)
 print(proj.name) # имя проекта
 print(issues_in_proj)
 
