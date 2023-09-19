@@ -2,27 +2,32 @@
 from openpyxl import load_workbook
 from datetime import date
 import time
-from Parse_word import name_act #передаем данные из акта
+from Parse_word import name_act, time_act, key_project_act #передаем данные из акта
+from Get_data_jira import total_time_jira #передаем данные из jira
 
 def create_report():
     # Load in the workbook
     wb = load_workbook('C:\\Users\\Admin\\PycharmProjects\\AVA\\report.xlsx')
 
     # Get sheet names
-    print(wb.get_sheet_names())
+    #print(wb.get_sheet_names())
 
     # Get a sheet by name
     sheet = wb.get_sheet_by_name('Лист1')
 
     # Print the sheet title
-    print(sheet.title)
+    #print(sheet.title)
 
     # Retrieve the value of a certain cell
-    sheet['A2'].value = name_act
+
+    sheet['B2'].value = name_act
+    sheet['B3'].value = key_project_act
+    sheet['B4'].value = time_act
+
+    sheet['D4'].value = total_time_jira
     wb.save(f"C:\\Users\\Admin\\PycharmProjects\\AVA\\report\\{date.today()}_{time.time()}_{name_act}.xlsx")
 
-    # Select element 'B2' of your sheet
-    sheet['B2'] = 'eee'
+
 
 
 
