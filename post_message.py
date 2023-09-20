@@ -21,33 +21,33 @@ def send_message(text, sub, path):
     msg['To'] = addr_to                            # Получатель
     msg['Subject'] = 'Тема сообщения' + sub                   # Тема сообщения
 
-    body = "Акт согласован от" + text
+    body = text
     msg.attach(MIMEText(body, 'plain'))                 # Добавляем в сообщение текст
 
     filepath = path  # Имя файла в абсолютном или относительном формате
     filename = os.path.basename(filepath)  # Только имя файла
 
 
-    ctype, encoding = mimetypes.guess_type(filepath)  # Определяем тип файла на основе его расширения
-    if ctype is None or encoding is not None:  # Если тип файла не определяется
-        ctype = 'application/octet-stream'  # Будем использовать общий тип
-    maintype, subtype = ctype.split('/', 1)  # Получаем тип и подтип
-    if maintype == 'text':  # Если текстовый файл
-        with open(filepath) as fp:  # Открываем файл для чтения
-            file = MIMEText(fp.read(), _subtype=subtype)  # Используем тип MIMEText
-            fp.close()  # После использования файл обязательно нужно закрыть
-    else:  # Неизвестный тип файла
+    ctype, encoding = mimetypes.guess_type(filepath)            # Определяем тип файла на основе его расширения
+    if ctype is None or encoding is not None:                   # Если тип файла не определяется
+        ctype = 'application/octet-stream'                      # Будем использовать общий тип
+    maintype, subtype = ctype.split('/', 1)                     # Получаем тип и подтип
+    if maintype == 'text':                                      # Если текстовый файл
+        with open(filepath) as fp:                              # Открываем файл для чтения
+            file = MIMEText(fp.read(), _subtype=subtype)         # Используем тип MIMEText
+            fp.close()                                          # После использования файл обязательно нужно закрыть
+    else:                                                       # Неизвестный тип файла
         with open(filepath, 'rb') as fp:
-            file = MIMEBase(maintype, subtype)  # Используем общий MIME-тип
-            file.set_payload(fp.read())  # Добавляем содержимое общего типа (полезную нагрузку)
+            file = MIMEBase(maintype, subtype)                  # Используем общий MIME-тип
+            file.set_payload(fp.read())                         # Добавляем содержимое общего типа (полезную нагрузку)
             fp.close()
-            encoders.encode_base64(file)  # Содержимое должно кодироваться как Base64
+            encoders.encode_base64(file)                        # Содержимое должно кодироваться как Base64
     file.add_header('Content-Disposition', 'attachment', filename=filename)  # Добавляем заголовки
-    msg.attach(file)  # Присоединяем файл к сообщению
+    msg.attach(file)                                            # Присоединяем файл к сообщению
 
     server = smtplib.SMTP('mail.flexcloud.ru', 587)           # Создаем объект SMTP
-    server.set_debuglevel(True)                         # Включаем режим отладки - если отчет не нужен, строку можно закомментировать
-    server.starttls()                                   # Начинаем шифрованный обмен по TLS
-    server.login(addr_from, password)                   # Получаем доступ
-    server.send_message(msg)                            # Отправляем сообщение
-    server.quit()                                       # Выходим
+    server.set_debuglevel(True)                             # Включаем режим отладки - если отчет не нужен, строку можно закомментировать
+    server.starttls()                                       # Начинаем шифрованный обмен по TLS
+    server.login(addr_from, password)                       # Получаем доступ
+    server.send_message(msg)                                # Отправляем сообщение
+    server.quit()                                           # Выходим

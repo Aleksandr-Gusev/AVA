@@ -9,6 +9,7 @@ import requests
 from datetime import datetime
 from Parse_word import date_start, date_end, name_act, key_project_act  #передаем данные из акта
 
+
 jira = JIRA(server='https://jira.i-sol.eu', basic_auth=('tcontrol', '1J*iBJGT'))
 
 

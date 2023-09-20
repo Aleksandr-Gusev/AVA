@@ -1,14 +1,26 @@
+from __future__ import annotations
 import docx
 import os
 
+import report
+from post_message import send_message
+import re
+from collections import Counter
+from typing import cast
+from jira import JIRA
+from jira.client import ResultList
+from jira.resources import Issue
+import requests
+from datetime import datetime
+from verification import verific
 # ---------------------------------------------- функция форматирования даты ------------------------------
 
 def formating_date (stroka):
     day = stroka[1:3]
     #print('День', day)
-    buf_month = stroka[5:13]
+    buf_month = stroka[stroka.index(' ')+1:stroka.index(' 20')]
     #print('Месяц', buf_month)
-    year = stroka[13:17]
+    year = stroka[-7:-3]
     #print('Год', year)
 
     month = ''
@@ -25,9 +37,9 @@ def formating_date (stroka):
     if buf_month == 'ноября': month = '11'
     if buf_month == 'декабря': month = '12'
 
-    date_act_form = day + '/' + month + '/' + year
+    date_act_form = year + '-' + month + '-' + day
     if month == '': date_act_form = "Проверьте корректность даты акта"
-
+    date_act_form = datetime.strptime(date_act_form, "%Y-%m-%d").date()  #перевод в тип даты
     return date_act_form
 
 
@@ -41,7 +53,7 @@ for root, dirs, files in os.walk(folder):
     for file in files:
         if file.endswith('docx') and not file.startswith('~'):
             paths.append(os.path.join(root, file))
-print('Всего файлов', len(paths))
+print('Всего актов', len(paths))
 #print(paths)
 
 # -----------------------------------------------создание экземпляра документа------------------------
@@ -65,7 +77,7 @@ for path in paths:
 
     #print(len(mas_tables))
 
-# -----------------------------------------------присвоение переменных------------------------
+# -----------------------------------------------инициализация переменных------------------------
     number_act = 0
     number_zayavka = 0
     date_act = ''
@@ -81,9 +93,13 @@ for path in paths:
 
     number_act = mas_tables[0].cell(0, 0).text[-1]  # Номер акта
     number_zayavka = mas_tables[4].cell(0, 0).text[-1] # Номер заявки
+
     date_act = mas_tables[1].cell(0, 1).text  # Дата акта
-    print('Дата акта -', formating_date(date_act))
+    date_act_f=formating_date(date_act)       #форматированная дата
+    print('Дата акта -', date_act_f)
+
     project_act = mas_tables[2].cell(1, 1).text  # Наименование проекта
+
     key_project_act = mas_tables[2].cell(1, 2).text  # Ключ проекта
 
     period = mas_tables[2].cell(1, 4).text  # период
@@ -91,6 +107,7 @@ for path in paths:
     date_end = period[15:26].replace(' ', '')  # дата завершения
 
     time_act = mas_tables[2].cell(1, 5).text  # трудозатраты
+    time_act = time_act.replace(',', '.')
     rate_act = mas_tables[2].cell(1, 6).text  # ставка в акте
     rate_zayavka = mas_tables[5].cell(1, 1).text  # ставка в заявке
     project_cost_act = mas_tables[2].cell(1, 7).text  # стоимость по проекту
@@ -147,8 +164,61 @@ for path in paths:
     print('Итого в тексте -', total_cost_act_in_text)
 
 # --------------------------------------- Запуск модуля jira---------------------------------
-    import Get_data_jira
+    jira = JIRA(server='https://jira.i-sol.eu', basic_auth=('tcontrol', '1J*iBJGT'))
 
+    # ------------------------ Ввод ФИО---------------------
+    date1 = date_start
+    date2 = date_end
+    date1 = date1.replace('.', '/')
+    date2 = date2.replace('.', '/')
+    date1 = datetime.strptime(date1, "%d/%m/%Y")
+    date2 = datetime.strptime(date2, "%d/%m/%Y")
+    # print(date1)
+    # print(date2)
+    # name_user = input('Введите Фамилию и Имя: \n')
+    name_user = name_act
+    name_user = name_user.replace(" ", "")
+    # name_project = input('Введите ключ проекта: \n')
+    name_project = key_project_act
+
+    # ----------------------- получение задач проекта-----------------------
+    issues_in_proj = jira.search_issues(f'project={name_project}')
+
+    proj = jira.project(key_project_act)
+    project_jira = proj.name
+    print(proj.name)  # имя проекта
+    # print(issues_in_proj)
+
+    # ----------------------- поиск задач в которых есть ФИО-----------------------
+    total_time_jira = 0
+    for j in range(len(issues_in_proj)):
+        x = jira.worklogs(issue=issues_in_proj[j])
+
+        time = 0
+        author = '-'
+        # print(issues_in_proj[j])
+        for i in range(len(x)):
+            author = x[i].updateAuthor.displayName
+            str = author.replace(" ", "")
+            index = x[i].started.split('T')  # разделение даты от времени
+            date_jira = datetime.strptime(index[0], "%Y-%m-%d")  # дата джиры
+
+            if str == name_user and date1 <= date_jira and date2 >= date_jira:
+                # print(x[i].started)
+                # print(index)
+                # print(x[i].id)
+                # print(x[i].timeSpentSeconds)
+                # print(x[i].updateAuthor)
+                time = x[i].timeSpentSeconds + time
+        # print(time/3600)
+
+        total_time_jira = total_time_jira + time
+
+    total_time_jira = format(total_time_jira / 3600, '.2f')
+    print('Трудозатраты в джире = ', total_time_jira)
+
+    text_message = verific(time_act, total_time_jira, project_act, project_jira, date_act_f)
 #----------------------------------------- создание отчета------------------------------------
-    from report import create_report
-    create_report()
+    report.create_report(date_act_f, number_act, number_zayavka, project_act, key_project_act, period, time_act, rate_act, rate_zayavka, project_cost_act, total_cost_act, total_cost_zayavka, total_cost_act_in_text, name_act2, name_act3, name_act, project_jira, date_start, date_end, total_time_jira, 'пока нет', author)
+# ----------------------------------------- отправка сообщения ------------------------------------
+    send_message(text_message, name_act, path)
