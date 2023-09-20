@@ -16,7 +16,18 @@ from verification import verific
 # ---------------------------------------------- функция форматирования даты ------------------------------
 
 def formating_date (stroka):
-    day = stroka[1:3]
+    #day = stroka[1:3]
+    day = stroka[0:stroka.index(' ')]
+    if len(day) != 2:
+        if day == '1': day = '01'
+        if day == '2': day = '02'
+        if day == '3': day = '03'
+        if day == '4': day = '04'
+        if day == '5': day = '05'
+        if day == '6': day = '06'
+        if day == '7': day = '07'
+        if day == '8': day = '08'
+        if day == '9': day = '09'
     #print('День', day)
     buf_month = stroka[stroka.index(' ')+1:stroka.index(' 20')]
     #print('Месяц', buf_month)
@@ -38,6 +49,8 @@ def formating_date (stroka):
     if buf_month == 'декабря': month = '12'
 
     date_act_form = year + '-' + month + '-' + day
+    global date_for_rename
+    date_for_rename = day + '-' + month + '-' + year
     if month == '': date_act_form = "Проверьте корректность даты акта"
     date_act_form = datetime.strptime(date_act_form, "%Y-%m-%d").date()  #перевод в тип даты
     return date_act_form
@@ -216,9 +229,9 @@ for path in paths:
 
     total_time_jira = format(total_time_jira / 3600, '.2f')
     print('Трудозатраты в джире = ', total_time_jira)
-
+    text_message = []
     text_message = verific(time_act, total_time_jira, project_act, project_jira, date_act_f)
 #----------------------------------------- создание отчета------------------------------------
     report.create_report(date_act_f, number_act, number_zayavka, project_act, key_project_act, period, time_act, rate_act, rate_zayavka, project_cost_act, total_cost_act, total_cost_zayavka, total_cost_act_in_text, name_act2, name_act3, name_act, project_jira, date_start, date_end, total_time_jira, 'пока нет', author)
 # ----------------------------------------- отправка сообщения ------------------------------------
-    send_message(text_message, name_act, path)
+    send_message(text_message[0], name_act, path, name_act2, number_act, date_for_rename, total_cost_act, text_message[1])

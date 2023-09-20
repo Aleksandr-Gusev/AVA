@@ -11,7 +11,7 @@ from email.mime.image import MIMEImage                    # Изображени
 from email.mime.audio import MIMEAudio                    # Аудио
 
 
-def send_message(text, sub, path):
+def send_message(text, sub, path, name_act, number_act, date_act, total_cost, flag_OK):
     addr_from = "actbot@i-sol.ru"                       # Адресат
     addr_to   = "aleksandr.gusev@i-sol.ru"                   # Получатель
     password  = "Parol1!"                                  # Пароль
@@ -42,7 +42,10 @@ def send_message(text, sub, path):
             file.set_payload(fp.read())                         # Добавляем содержимое общего типа (полезную нагрузку)
             fp.close()
             encoders.encode_base64(file)                        # Содержимое должно кодироваться как Base64
-    file.add_header('Content-Disposition', 'attachment', filename=filename)  # Добавляем заголовки
+    if flag_OK == 1:
+        file.add_header('Content-Disposition', 'attachment', filename=f'ИП {name_act}- Акт № {number_act} от {date_act}г. ({total_cost}).docx')  # Добавляем заголовки
+    else:
+        file.add_header('Content-Disposition', 'attachment', filename=filename)  # Добавляем заголовки
     msg.attach(file)                                            # Присоединяем файл к сообщению
 
     server = smtplib.SMTP('mail.flexcloud.ru', 587)           # Создаем объект SMTP
