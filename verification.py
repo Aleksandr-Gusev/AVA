@@ -1,15 +1,16 @@
 from datetime import date
 
-def verific(time_act, total_time_jira, project_act, project_jira, date_act_f):
+def verific(time_act, total_time_jira, project_act, project_jira, date_act_f, full_name_act1, name_act2, name_act3, number_act, number_zayavka, rate_act, rate_zayavka, cost_for_verification, project_cost_act):
     global flag_time
     global flag_OK
     flag_OK = 0             #флаг если все проверки успешны примет 1
     flag_time = 0
     if time_act == total_time_jira:
         flag_time = 1
-        text1 = 'Трудозатраты - Верно'
+        #text1 = 'Трудозатраты - Верно \n\n'
+        text1 = ''
     else:
-        text1 = 'Трудозатраты - Неверно (Проверьте, пожалуйста, трудозатраты, данные в акте должны совпадать с данными в JIRA за указанный период. В JIRA заведено - ' + total_time_jira + ' ч.)'
+        text1 = '   Трудозатраты - Неверно (проверьте, пожалуйста, трудозатраты, данные в акте должны совпадать с данными в JIRA за указанный период. В JIRA заведено - ' + total_time_jira + ' ч.) \n\n'
 
 
     global flag_project
@@ -20,9 +21,10 @@ def verific(time_act, total_time_jira, project_act, project_jira, date_act_f):
     project_jira_f = project_jira_f.lower()
     if project_act == project_jira_f:
         flag_project = 1
-        text2 = 'Наименование проекта - Верно'
+        #text2 = 'Наименование проекта - Верно \n\n'
+        text2 = ''
     else:
-        text2 = 'Наименование проекта - Неверно (Проверьте, пожалуйста, наименование проекта. Наименование проекта в JIRA - ' + project_jira + ')'
+        text2 = '   Наименование проекта - Неверно (проверьте, пожалуйста, наименование проекта. Наименование проекта в JIRA: ' + project_jira + ') \n\n'
 
     global flag_date_act
     flag_date_act = 0
@@ -30,14 +32,58 @@ def verific(time_act, total_time_jira, project_act, project_jira, date_act_f):
 
     if date_act_f == curent_date:
         flag_date_act = 1
-        text3 = 'Дата акта - Верно'
+        #text3 = 'Дата акта - Верно \n\n'
+        text3 = ''
     else:
-        text3 = 'Дата акта - Неверно (Дата акта должна соответствовать текущей дате)'
+        text3 = '   Дата акта - Неверно (дата акта должна соответствовать текущей дате) \n\n'
 
-    if flag_time == 1 and flag_project == 1 and flag_date_act ==1:
+#---------------- проверка совпадения ФИО----------------------------------------------------
+    global flag_FIO
+    flag_FIO = 0
+    full_name_act1 = full_name_act1.replace(' ', '')
+    full_name_act1 = full_name_act1.lower()
+    name_act2 = name_act2.replace(' ', '')
+    name_act2 = name_act2.lower()
+    name_act3 = name_act3.replace(' ', '')
+    name_act3 = name_act3.lower()
+    if full_name_act1 == name_act2 and full_name_act1 == name_act3:
+        flag_FIO = 1
+        text4 = ''
+    else:
+        text4 = '   Заполнение полей с ФИО - Неверно (проверьте, пожалуйста, корректность заполнения полей с ФИО в акте и заявке) \n\n'
+# ---------------- проверка совпадения номера акта и заявки----------------------------------------------------
+    global flag_number_act
+    flag_number_act = 0
+
+    if number_act == number_zayavka:
+        flag_number_act = 1
+        text5 = ''
+    else:
+        text5 = '   Номер акта или заявки - Неверно (проверьте, пожалуйста, номера акта и заявки, они должны быть одинаковыми) \n\n'
+# ---------------- проверка совпадения номера акта и заявки----------------------------------------------------
+    global flag_rate
+    flag_rate = 0
+    rate_zayavka = rate_zayavka.replace(' ', '')
+    rate_act = rate_act.replace(' ', '')
+    if rate_zayavka == rate_act:
+        flag_rate = 1
+        text6 = ''
+    else:
+        text6 = '   Ставка в акте или заявке - Неверно (проверьте, пожалуйста, ставки в акте и заявке, они должны быть одинаковыми) \n\n'
+# ---------------- проверка совпадения стоимости по проекту----------------------------------------------------
+    global flag_cost_project
+    flag_cost_project = 0
+    project_cost_act = format(float(project_cost_act.replace(',', '.')), '.2f')
+    if cost_for_verification == project_cost_act:
+        flag_cost_project = 1
+        text7 = ''
+    else:
+        text7 = '   Стоимость проекта - Неверно (проверьте, пожалуйста, расчет стоимости проекта) \n\n'
+#------------------------формирование текста сообщения------------------------------------------
+    if flag_time == 1 and flag_project == 1 and flag_date_act == 1 and flag_FIO == 1 and flag_number_act == 1 and flag_rate == 1 and flag_cost_project == 1:
         text_message = 'Завершена роботизированная проверка акта и заявки.\nРезультат обработки: Согласовано.'
         flag_OK = 1
     else:
-        text_message = 'Завершена роботизированная проверка акта и заявки.\nРезультат обработки:'+ '\n\n' + text1 + '\n\n' + text2 + '\n\n' + text3
+        text_message = 'Завершена роботизированная проверка акта и заявки.\nРезультат обработки:'+ '\n\n' + text1 + text2 + text3 + text4 + text5 + text6 + text7 +'Акт и заявка во вложении. Просьба проверить документы в соответствии с замечаниями и направить повторно на проверку на электронный адрес actbot@i-sol.ru'
 
     return [text_message, flag_OK]

@@ -17,7 +17,7 @@ from verification import verific
 
 def formating_date (stroka):
     #day = stroka[1:3]
-    day = stroka[0:stroka.index(' ')]
+    day = stroka[1:stroka.index(' ')-1]
     if len(day) != 2:
         if day == '1': day = '01'
         if day == '2': day = '02'
@@ -50,14 +50,10 @@ def formating_date (stroka):
 
     date_act_form = year + '-' + month + '-' + day
     global date_for_rename
-    date_for_rename = day + '-' + month + '-' + year
+    date_for_rename = day + '-' + month + '-' + year                    # переменная для переименования акта
     if month == '': date_act_form = "Проверьте корректность даты акта"
     date_act_form = datetime.strptime(date_act_form, "%Y-%m-%d").date()  #перевод в тип даты
     return date_act_form
-
-
-
-#def run():
 
 # -----------------------------------------------поиск и запись всех путей файлов------------------------
 paths = []
@@ -103,6 +99,8 @@ for path in paths:
     project_cost_act = 0
     total_cost_act = 0
     total_cost_zayavka = 0
+    name_act2 = ''
+    name_act3 = ''
 
     number_act = mas_tables[0].cell(0, 0).text[-1]  # Номер акта
     number_zayavka = mas_tables[4].cell(0, 0).text[-1] # Номер заявки
@@ -126,8 +124,12 @@ for path in paths:
     project_cost_act = mas_tables[2].cell(1, 7).text  # стоимость по проекту
     total_cost_act = mas_tables[2].cell(2, 7).text  # Итого в акте
     total_cost_zayavka = mas_tables[5].cell(1, 3).text  # Итого в заявке
-    name_act2 = mas_tables[3].cell(1, 1).text[3:len(mas_tables[3].cell(1, 1).text)]  # имя в  акте 2
-    name_act3 = mas_tables[6].cell(1, 1).text[3:len(mas_tables[3].cell(1, 1).text)]  # имя  в акте 3
+
+    rate_for_calculate = rate_act.replace(',', '.')
+    cost_for_verification = format(float(rate_for_calculate) * float(time_act), '.2f')  #расчет стоимости проекта
+
+    #name_act2 = mas_tables[3].cell(1, 1).text[3:len(mas_tables[3].cell(1, 1).text)]  # имя в  акте 2
+    #name_act3 = mas_tables[6].cell(1, 1).text[3:len(mas_tables[3].cell(1, 1).text)]  # имя  в акте 3
 
 
     print('Номер акта -', number_act)
@@ -144,8 +146,8 @@ for path in paths:
     print('Стоимость по проекту -', project_cost_act)  # стоимость по проекту
     print('Итого в таблице -', total_cost_act)  # Итого
     print('Итого в заявке -', total_cost_zayavka)
-    print('Имя в подписи 1 -', name_act2)
-    print('Имя в подписи 2 -', name_act3)
+    #print('Имя в подписи 1 -', name_act2)
+    #print('Имя в подписи 2 -', name_act3)
 
 # -----------------------------------------------работа с текстом------------------------
     text = []
@@ -154,11 +156,19 @@ for path in paths:
 
     """print('\n'.join(text))"""
 
-
-
     # ----------------------------------------------- выделение имени из акта ------------------------
-
-    full_name_act1 = text[5][text[5].index('ИП')+3:text[5].index(', именуемый')]   # выделение имени
+    start_index = text[5].find('ИП ')
+    type_of_act = 0                      # тип акта 0 - ИП, 1 - Самозанятый
+    if start_index != -1:
+        full_name_act1 = text[5][text[5].index('ИП ')+3:text[5].index(', именуемый')]   # выделение имени
+        name_act2 = mas_tables[3].cell(1, 1).text[3:len(mas_tables[3].cell(1, 1).text)]  # имя в  акте 2
+        name_act3 = mas_tables[6].cell(1, 1).text[3:len(mas_tables[3].cell(1, 1).text)]  # имя  в акте 3
+        type_of_act = 0
+    if start_index == -1:
+        full_name_act1 = text[5][text[5].index('стороны, и ')+11:text[5].index(', именуемый')]   # выделение имени
+        name_act2 = mas_tables[3].cell(1, 1).text[0:len(mas_tables[3].cell(1, 1).text)]  # имя в  акте 2
+        name_act3 = mas_tables[6].cell(1, 1).text[0:len(mas_tables[3].cell(1, 1).text)]  # имя  в акте 3
+        type_of_act = 1
     #print(full_name_act1)
 
     name_act = full_name_act1[0:full_name_act1.rfind(' ')]
@@ -166,7 +176,6 @@ for path in paths:
     print('Имя в акте -', name_act)
 
     # -----------------------------------------------выделение суммы из текста акта------------------------
-
 
     rub = text[9][text[9].index('сумму ')+6:text[9].index(' (')]   # выделение суммы руб
     copeyka = text[9][text[9].index(' копе')-2:text[9].index(' копе')]   # выделение суммы копейки
@@ -229,9 +238,10 @@ for path in paths:
 
     total_time_jira = format(total_time_jira / 3600, '.2f')
     print('Трудозатраты в джире = ', total_time_jira)
+# ----------------------------------------- проверка данных ------------------------------------
     text_message = []
-    text_message = verific(time_act, total_time_jira, project_act, project_jira, date_act_f)
+    text_message = verific(time_act, total_time_jira, project_act, project_jira, date_act_f, full_name_act1, name_act2, name_act3, number_act, number_zayavka, rate_act, rate_zayavka, cost_for_verification, project_cost_act)
 #----------------------------------------- создание отчета------------------------------------
     report.create_report(date_act_f, number_act, number_zayavka, project_act, key_project_act, period, time_act, rate_act, rate_zayavka, project_cost_act, total_cost_act, total_cost_zayavka, total_cost_act_in_text, name_act2, name_act3, name_act, project_jira, date_start, date_end, total_time_jira, 'пока нет', author)
 # ----------------------------------------- отправка сообщения ------------------------------------
-    send_message(text_message[0], name_act, path, name_act2, number_act, date_for_rename, total_cost_act, text_message[1])
+    send_message(text_message[0], name_act, path, name_act2, number_act, date_for_rename, total_cost_act, text_message[1], type_of_act, project_act)
