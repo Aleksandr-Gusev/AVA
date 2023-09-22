@@ -101,29 +101,39 @@ for path in paths:
     total_cost_zayavka = 0
     name_act2 = ''
     name_act3 = ''
+    # -----------------------------------------------получение данных------------------------
 
-    number_act = mas_tables[0].cell(0, 0).text[-1]  # Номер акта
-    number_zayavka = mas_tables[4].cell(0, 0).text[-1] # Номер заявки
+    #number_act = mas_tables[0].cell(0, 0).text[-1]  # Номер акта
+    #number_zayavka = mas_tables[4].cell(0, 0).text[-1] # Номер заявки
 
-    date_act = mas_tables[1].cell(0, 1).text  # Дата акта
-    date_act_f=formating_date(date_act)       #форматированная дата
-    print('Дата акта -', date_act_f)
+    #date_act = mas_tables[1].cell(0, 1).text  # Дата акта
+    #date_act_f=formating_date(date_act)       #форматированная дата
+    #print('Дата акта -', date_act_f)
 
-    project_act = mas_tables[2].cell(1, 1).text  # Наименование проекта
+    project_act = mas_tables[0].cell(1, 1).text  # Наименование проекта
+    project_act = project_act[project_act.index('ПРОЕКТ: ')+8:len(project_act)+1]
+    #key_project_act = mas_tables[2].cell(1, 2).text  # Ключ проекта
 
-    key_project_act = mas_tables[2].cell(1, 2).text  # Ключ проекта
-
-    period = mas_tables[2].cell(1, 4).text  # период
+    period = mas_tables[0].cell(1, 3).text  # период
     date_start = period[2:12].replace(' ', '')  # дата начала
     date_end = period[15:26].replace(' ', '')  # дата завершения
 
-    time_act = mas_tables[2].cell(1, 5).text  # трудозатраты
+    time_act = mas_tables[0].cell(1, 4).text  # трудозатраты
     time_act = time_act.replace(',', '.')
-    rate_act = mas_tables[2].cell(1, 6).text  # ставка в акте
-    rate_zayavka = mas_tables[5].cell(1, 1).text  # ставка в заявке
-    project_cost_act = mas_tables[2].cell(1, 7).text  # стоимость по проекту
-    total_cost_act = mas_tables[2].cell(2, 7).text  # Итого в акте
-    total_cost_zayavka = mas_tables[5].cell(1, 3).text  # Итого в заявке
+    time_act = time_act[time_act.index('Отработано:') + 11:len(time_act) + 1]
+
+    rate_act = mas_tables[0].cell(1, 5).text  # ставка в акте
+    rate_act = rate_act[rate_act.index('Ставка:') + 7:len(rate_act) + 1]
+
+    rate_zayavka = mas_tables[2].cell(1, 1).text  # ставка в заявке
+
+    project_cost_act = mas_tables[0].cell(1, 6).text  # стоимость по проекту
+    project_cost_act = project_cost_act[project_cost_act.index('Стоимость:') + 10:len(project_cost_act) + 1]
+
+    total_cost_act = mas_tables[0].cell(2, 6).text  # Итого в акте
+    total_cost_act = total_cost_act[total_cost_act.index('ИТОГО:') + 6:len(total_cost_act) + 1]
+
+    total_cost_zayavka = mas_tables[2].cell(1, 3).text  # Итого в заявке
 
     rate_for_calculate = rate_act.replace(',', '.')
     cost_for_verification = format(float(rate_for_calculate) * float(time_act), '.2f')  #расчет стоимости проекта
@@ -154,20 +164,20 @@ for path in paths:
     for paragraph in doc.paragraphs:                   # получение списка параграфов
         text.append(paragraph.text)
 
-    """print('\n'.join(text))"""
+    #print('\n'.join(text))
 
     # ----------------------------------------------- выделение имени из акта ------------------------
-    start_index = text[5].find('ИП ')
+    start_index = text[4].find('ИП ')
     type_of_act = 0                      # тип акта 0 - ИП, 1 - Самозанятый
     if start_index != -1:
-        full_name_act1 = text[5][text[5].index('ИП ')+3:text[5].index(', именуемый')]   # выделение имени
-        name_act2 = mas_tables[3].cell(1, 1).text[3:len(mas_tables[3].cell(1, 1).text)]  # имя в  акте 2
-        name_act3 = mas_tables[6].cell(1, 1).text[3:len(mas_tables[3].cell(1, 1).text)]  # имя  в акте 3
+        full_name_act1 = text[4][text[4].index('ИП ')+3:text[4].index(', именуемый')]   # выделение имени
+        name_act2 = mas_tables[1].cell(1, 1).text[3:len(mas_tables[1].cell(1, 1).text)]  # имя в  акте 2
+        name_act3 = mas_tables[3].cell(1, 1).text[3:len(mas_tables[3].cell(1, 1).text)]  # имя  в акте 3
         type_of_act = 0
     if start_index == -1:
-        full_name_act1 = text[5][text[5].index('стороны, и ')+11:text[5].index(', именуемый')]   # выделение имени
-        name_act2 = mas_tables[3].cell(1, 1).text[0:len(mas_tables[3].cell(1, 1).text)]  # имя в  акте 2
-        name_act3 = mas_tables[6].cell(1, 1).text[0:len(mas_tables[3].cell(1, 1).text)]  # имя  в акте 3
+        full_name_act1 = text[4][text[4].index('стороны, и ')+11:text[4].index(', именуемый')]   # выделение имени
+        name_act2 = mas_tables[1].cell(1, 1).text[0:len(mas_tables[1].cell(1, 1).text)]  # имя в  акте 2
+        name_act3 = mas_tables[3].cell(1, 1).text[0:len(mas_tables[3].cell(1, 1).text)]  # имя  в акте 3
         type_of_act = 1
     #print(full_name_act1)
 
@@ -177,13 +187,37 @@ for path in paths:
 
     # -----------------------------------------------выделение суммы из текста акта------------------------
 
-    rub = text[9][text[9].index('сумму ')+6:text[9].index(' (')]   # выделение суммы руб
-    copeyka = text[9][text[9].index(' копе')-2:text[9].index(' копе')]   # выделение суммы копейки
+    #print(text[8])
+    rub = text[8][text[8].index('сумму ')+6:text[8].index(' (')]   # выделение суммы руб
+    copeyka = text[8][text[8].index(' копе')-2:text[8].index(' копе')]   # выделение суммы копейки
     #print(rub)
     #print(copeyka)
 
     total_cost_act_in_text = rub + ',' + copeyka   # полная сумма
     print('Итого в тексте -', total_cost_act_in_text)
+
+#----------------------------------------------------- выделение из текста ---------------------
+
+    #number_act = mas_tables[0].cell(0, 0).text[-1]  # Номер акта
+    number_act = text[0][text[0].index('АКТ  № ') + 7:len(text[0]) + 1]
+
+    #number_zayavka = mas_tables[4].cell(0, 0).text[-1] # Номер заявки
+    number_zayavka = text[19][text[19].index('Заявка на оказание услуг №') + 26:len(text[19]) + 1]
+
+# ---------------------------------- парсинг даты ---------------------------------------
+    #date_act = mas_tables[1].cell(0, 1).text  # Дата акта
+    index1 = 0
+    index_count = 1
+
+    for i in range(len(text[2])):
+        if i > 50 and not text[2][i].isspace():
+            index1 = index_count
+            break
+        index_count +=1
+
+    date_act = text[2][index1-1:len(text[2])]
+    date_act_f=formating_date(date_act)       #форматированная дата
+    # print('Дата акта -', date_act_f)
 
 # --------------------------------------- Запуск модуля jira---------------------------------
     jira = JIRA(server='https://jira.i-sol.eu', basic_auth=('tcontrol', '1J*iBJGT'))
@@ -201,12 +235,19 @@ for path in paths:
     name_user = name_act
     name_user = name_user.replace(" ", "")
     # name_project = input('Введите ключ проекта: \n')
-    name_project = key_project_act
+    name_project = ''
 
     # ----------------------- получение задач проекта-----------------------
+    all_project = jira.projects()                   #получение всех проектов
+    pa = project_act.replace(' ', '').lower()       #форматирование project_act
+    for p in range(len(all_project)):
+        n = all_project[p].name.replace(' ', '').lower()
+        if pa == n:                                 #если наименование проекта найдено
+            name_project = all_project[p].key
+
     issues_in_proj = jira.search_issues(f'project={name_project}')
 
-    proj = jira.project(key_project_act)
+    proj = jira.project(name_project)
     project_jira = proj.name
     print(proj.name)  # имя проекта
     # print(issues_in_proj)
