@@ -1,7 +1,7 @@
 from __future__ import annotations
 import docx
 import os
-
+import json
 import report
 from post_message import send_message
 import re
@@ -14,6 +14,16 @@ import requests
 from datetime import datetime
 from verification import verific
 # ---------------------------------------------- функция форматирования даты ------------------------------
+
+def check_structure_ip(name_ip):
+    with open('check.json', 'r', encoding='utf-8') as f: # открытие файла для чтения
+        data = json.load(f) # чтение данных из файла в формате JSON в объект Python
+
+    if name_ip in data:
+        structure = data[name_ip]
+    else:
+        structure = 'нет совпадения'
+    return structure
 
 def formating_date (stroka):
     #day = stroka[1:3]
@@ -101,6 +111,7 @@ for path in paths:
     total_cost_zayavka = 0
     name_act2 = ''
     name_act3 = ''
+    name_user = ''
     # -----------------------------------------------получение данных------------------------
 
     #number_act = mas_tables[0].cell(0, 0).text[-1]  # Номер акта
@@ -232,7 +243,15 @@ for path in paths:
     # print(date1)
     # print(date2)
     # name_user = input('Введите Фамилию и Имя: \n')
-    name_user = name_act
+
+
+#--------------------------------- проверка есть внутри ИП другие участники -----------------------
+    new_name = check_structure_ip(full_name_act1)
+    if new_name == 'нет совпадения':  # проверяем есть ли ФИО в базе ИП и переключаемся на другое ФИО если находим
+        name_user = name_act
+    else:
+        name_user = new_name
+
     name_user = name_user.replace(" ", "")
     # name_project = input('Введите ключ проекта: \n')
     name_project = ''
@@ -245,44 +264,49 @@ for path in paths:
         if pa == n:                                 #если наименование проекта найдено
             name_project = all_project[p].key
 
-    issues_in_proj = jira.search_issues(f'project={name_project}')
+    if name_project != '':                          #если наименование проекта найдено
+        issues_in_proj = jira.search_issues(f'project={name_project}', maxResults=350)
+        proj = jira.project(name_project)
+        project_jira = proj.name
+        print(proj.name)  # имя проекта
+        #print(issues_in_proj)
 
-    proj = jira.project(name_project)
-    project_jira = proj.name
-    print(proj.name)  # имя проекта
-    # print(issues_in_proj)
+        # ----------------------- поиск задач в которых есть ФИО-----------------------
+        total_time_jira = 0
+        for j in range(len(issues_in_proj)):
+            x = jira.worklogs(issue=issues_in_proj[j])
 
-    # ----------------------- поиск задач в которых есть ФИО-----------------------
-    total_time_jira = 0
-    for j in range(len(issues_in_proj)):
-        x = jira.worklogs(issue=issues_in_proj[j])
+            time = 0
+            author = '-'
+            #print(issues_in_proj[j])
+            for i in range(len(x)):
+                author = x[i].updateAuthor.displayName
+                str = author.replace(" ", "")
+                index = x[i].started.split('T')  # разделение даты от времени
+                date_jira = datetime.strptime(index[0], "%Y-%m-%d")  # дата джиры
 
-        time = 0
-        author = '-'
-        # print(issues_in_proj[j])
-        for i in range(len(x)):
-            author = x[i].updateAuthor.displayName
-            str = author.replace(" ", "")
-            index = x[i].started.split('T')  # разделение даты от времени
-            date_jira = datetime.strptime(index[0], "%Y-%m-%d")  # дата джиры
+                if str == name_user and date1 <= date_jira and date2 >= date_jira:
+                    #print(x[i].started)
+                    #print(index)
+                    #print(x[i].id)
+                    #print(x[i].timeSpentSeconds)
+                    #print(x[i].updateAuthor)
+                    time = x[i].timeSpentSeconds + time
+            #print(time/3600)
 
-            if str == name_user and date1 <= date_jira and date2 >= date_jira:
-                # print(x[i].started)
-                # print(index)
-                # print(x[i].id)
-                # print(x[i].timeSpentSeconds)
-                # print(x[i].updateAuthor)
-                time = x[i].timeSpentSeconds + time
-        # print(time/3600)
+            total_time_jira = total_time_jira + time
 
-        total_time_jira = total_time_jira + time
+        total_time_jira = format(total_time_jira / 3600, '.2f')
+        print('Трудозатраты в джире = ', total_time_jira)
+    # ----------------------------------------- проверка данных ------------------------------------
+        text_message = []
+        text_message = verific(time_act, total_time_jira, project_act, project_jira, date_act_f, full_name_act1, name_act2, name_act3, number_act, number_zayavka, rate_act, rate_zayavka, cost_for_verification, project_cost_act, total_cost_act, total_cost_act_in_text, total_cost_zayavka)
+    #----------------------------------------- создание отчета------------------------------------
+        report.create_report(date_act_f, number_act, number_zayavka, project_act, key_project_act, period, time_act, rate_act, rate_zayavka, project_cost_act, total_cost_act, total_cost_zayavka, total_cost_act_in_text, name_act2, name_act3, name_act, project_jira, date_start, date_end, total_time_jira, cost_for_verification, author)
+    # ----------------------------------------- отправка сообщения ------------------------------------
+        send_message(text_message[0], name_act, path, name_act2, number_act, date_for_rename, total_cost_act, text_message[1], type_of_act, project_act)
 
-    total_time_jira = format(total_time_jira / 3600, '.2f')
-    print('Трудозатраты в джире = ', total_time_jira)
-# ----------------------------------------- проверка данных ------------------------------------
-    text_message = []
-    text_message = verific(time_act, total_time_jira, project_act, project_jira, date_act_f, full_name_act1, name_act2, name_act3, number_act, number_zayavka, rate_act, rate_zayavka, cost_for_verification, project_cost_act)
-#----------------------------------------- создание отчета------------------------------------
-    report.create_report(date_act_f, number_act, number_zayavka, project_act, key_project_act, period, time_act, rate_act, rate_zayavka, project_cost_act, total_cost_act, total_cost_zayavka, total_cost_act_in_text, name_act2, name_act3, name_act, project_jira, date_start, date_end, total_time_jira, 'пока нет', author)
-# ----------------------------------------- отправка сообщения ------------------------------------
-    send_message(text_message[0], name_act, path, name_act2, number_act, date_for_rename, total_cost_act, text_message[1], type_of_act, project_act)
+    if name_project == '':  # если наименование проекта не найдено
+        send_message('Завершена роботизированная проверка акта и заявки.\nРезультат обработки:'+ '\n\n' +
+                     '     Проект, указанный в акте, не найден в JIRA. Проверьте, пожалуйста, верно ли указано наименование проекта в акте' + '\n\n' +
+                     'Акт и заявка во вложении. Просьба проверить документы в соответствии с замечаниями и направить повторно на проверку на электронный адрес actbot@i-sol.ru', '', path, '', '', '', '', 0, '', '')

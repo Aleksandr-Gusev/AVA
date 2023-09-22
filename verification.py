@@ -1,6 +1,6 @@
 from datetime import date
 
-def verific(time_act, total_time_jira, project_act, project_jira, date_act_f, full_name_act1, name_act2, name_act3, number_act, number_zayavka, rate_act, rate_zayavka, cost_for_verification, project_cost_act):
+def verific(time_act, total_time_jira, project_act, project_jira, date_act_f, full_name_act1, name_act2, name_act3, number_act, number_zayavka, rate_act, rate_zayavka, cost_for_verification, project_cost_act, total_cost_act, total_cost_act_in_text, total_cost_zayavka):
     global flag_time
     global flag_OK
     flag_OK = 0             #флаг если все проверки успешны примет 1
@@ -79,11 +79,44 @@ def verific(time_act, total_time_jira, project_act, project_jira, date_act_f, fu
         text7 = ''
     else:
         text7 = '   Стоимость проекта - Неверно (проверьте, пожалуйста, расчет стоимости проекта) \n\n'
+
+    # ---------------- проверка совпадения стоимости по Итого в таблице----------------------------------------------------
+    global flag_cost_total_table
+    flag_cost_total_table = 0
+    total_cost_act = format(float(total_cost_act.replace(',', '.')), '.2f')
+    if cost_for_verification == total_cost_act:
+        flag_cost_total_table = 1
+        text8 = ''
+    else:
+        text8 = '   Итоговая стоимость проекта - Неверно (проверьте, пожалуйста, расчет итоговой стоимости проекта) \n\n'
+
+    # ---------------- проверка совпадения стоимости Итого в тексте----------------------------------------------------
+    global flag_cost_total_text
+    flag_cost_total_text = 0
+    total_cost_act_in_text = format(float(total_cost_act_in_text.replace(',', '.')), '.2f')
+    if cost_for_verification == total_cost_act_in_text:
+        flag_cost_total_text = 1
+        text9 = ''
+    else:
+        text9 = '   Итоговая стоимость проекта в тексте - Неверно (проверьте, пожалуйста, указанную итоговую стоимость в тексте) \n\n'
+
+    # ---------------- проверка совпадения стоимости в акте и в заявке----------------------------------------------------
+    global flag_cost_total_zayvka
+    flag_cost_total_zayvka = 0
+    if total_cost_zayavka != '-':
+        total_cost_zayavka = format(float(total_cost_zayavka.replace(',', '.')), '.2f')
+        if cost_for_verification == total_cost_zayavka:
+            flag_cost_total_zayvka = 1
+            text10 = ''
+        else:
+            text10 = '   Итоговая стоимость проекта в заявке - Неверно (проверьте, пожалуйста, итоговую стоимость в заявке) \n\n'
+    else:
+        text10 = ''
 #------------------------формирование текста сообщения------------------------------------------
-    if flag_time == 1 and flag_project == 1 and flag_date_act == 1 and flag_FIO == 1 and flag_number_act == 1 and flag_rate == 1 and flag_cost_project == 1:
+    if flag_time == 1 and flag_project == 1 and flag_date_act == 1 and flag_FIO == 1 and flag_number_act == 1 and flag_rate == 1 and flag_cost_project == 1 and flag_cost_total_table == 1 and flag_cost_total_text == 1:
         text_message = 'Завершена роботизированная проверка акта и заявки.\nРезультат обработки: Согласовано.'
         flag_OK = 1
     else:
-        text_message = 'Завершена роботизированная проверка акта и заявки.\nРезультат обработки:'+ '\n\n' + text1 + text2 + text3 + text4 + text5 + text6 + text7 +'Акт и заявка во вложении. Просьба проверить документы в соответствии с замечаниями и направить повторно на проверку на электронный адрес actbot@i-sol.ru'
+        text_message = 'Завершена роботизированная проверка акта и заявки.\nРезультат обработки:'+ '\n\n' + text1 + text2 + text3 + text4 + text5 + text6 + text7 + text8 + text9 + text10 +'Акт и заявка во вложении. Просьба проверить документы в соответствии с замечаниями и направить повторно на проверку на электронный адрес actbot@i-sol.ru'
 
     return [text_message, flag_OK]
