@@ -13,7 +13,8 @@ from email.mime.audio import MIMEAudio                    # Аудио
 
 def send_message(text, sub, path, name_act, number_act, date_act, total_cost, flag_OK, type_of_act, project_act):
     addr_from = "actbot@i-sol.ru"                       # Адресат
-    addr_to   = "aleksandr.gusev@i-sol.ru"                   # Получатель
+    #addr_to   = "aleksandr.gusev@i-sol.ru"                   # Получатель
+    addr_to = "actbot@i-sol.ru"                             # Получатель
     password  = "Parol1!"                                  # Пароль
 
     msg = MIMEMultipart()                               # Создаем сообщение
@@ -46,9 +47,9 @@ def send_message(text, sub, path, name_act, number_act, date_act, total_cost, fl
             encoders.encode_base64(file)                        # Содержимое должно кодироваться как Base64
     if flag_OK == 1:
         if type_of_act == 0:
-            file.add_header('Content-Disposition', 'attachment', filename=f'ИП {name_act}- Акт № {number_act} от {date_act}г. ({total_cost}).docx')  # Добавляем заголовки
+            file.add_header('Content-Disposition', 'attachment', filename=f'ИП {name_act} - Акт № {number_act} от {date_act}г. ({total_cost}).docx')  # Добавляем заголовки
         if type_of_act == 1:
-            file.add_header('Content-Disposition', 'attachment', filename=f'{name_act}- Акт № {number_act} от {date_act}г. ({total_cost}).docx')  # Добавляем заголовки
+            file.add_header('Content-Disposition', 'attachment', filename=f'{name_act} - Акт № {number_act} от {date_act}г. ({total_cost}).docx')  # Добавляем заголовки
     else:
         file.add_header('Content-Disposition', 'attachment', filename=filename)  # Добавляем заголовки
     msg.attach(file)                                            # Присоединяем файл к сообщению

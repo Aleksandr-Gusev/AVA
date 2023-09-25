@@ -30,12 +30,15 @@ def verific(time_act, total_time_jira, project_act, project_jira, date_act_f, fu
     flag_date_act = 0
     curent_date = date.today()
 
-    if date_act_f == curent_date:
-        flag_date_act = 1
-        #text3 = 'Дата акта - Верно \n\n'
-        text3 = ''
+    if date_act_f != -1:
+        if date_act_f == curent_date:
+            flag_date_act = 1
+            #text3 = 'Дата акта - Верно \n\n'
+            text3 = ''
+        else:
+            text3 = '   Дата акта - Неверно (дата акта должна соответствовать текущей дате) \n\n'
     else:
-        text3 = '   Дата акта - Неверно (дата акта должна соответствовать текущей дате) \n\n'
+        text3 = '   Дата акта - Неверно (Проверьте, пожалуйста, корректно ли указан месяц в дате акта) \n\n'
 
 #---------------- проверка совпадения ФИО----------------------------------------------------
     global flag_FIO

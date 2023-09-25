@@ -46,24 +46,28 @@ def formating_date (stroka):
 
     month = ''
     if buf_month == 'января': month = '01'
-    if buf_month == 'февраля': month = '02'
-    if buf_month == 'марта': month = '03'
-    if buf_month == 'апреля': month = '04'
-    if buf_month == 'мая': month = '05'
-    if buf_month == 'июня': month = '06'
-    if buf_month == 'июля': month = '07'
-    if buf_month == 'августа': month = '08'
-    if buf_month == 'сентября': month = '09'
-    if buf_month == 'октября': month = '10'
-    if buf_month == 'ноября': month = '11'
-    if buf_month == 'декабря': month = '12'
-
-    date_act_form = year + '-' + month + '-' + day
-    global date_for_rename
-    date_for_rename = day + '-' + month + '-' + year                    # переменная для переименования акта
-    if month == '': date_act_form = "Проверьте корректность даты акта"
-    date_act_form = datetime.strptime(date_act_form, "%Y-%m-%d").date()  #перевод в тип даты
-    return date_act_form
+    elif buf_month == 'февраля': month = '02'
+    elif buf_month == 'марта': month = '03'
+    elif buf_month == 'апреля': month = '04'
+    elif buf_month == 'мая': month = '05'
+    elif buf_month == 'июня': month = '06'
+    elif buf_month == 'июля': month = '07'
+    elif buf_month == 'августа': month = '08'
+    elif buf_month == 'сентября': month = '09'
+    elif buf_month == 'октября': month = '10'
+    elif buf_month == 'ноября': month = '11'
+    elif buf_month == 'декабря': month = '12'
+    else: month = '-'
+    if month != '-':
+        date_act_form = year + '-' + month + '-' + day
+        global date_for_rename
+        date_for_rename = day + '-' + month + '-' + year                    # переменная для переименования акта
+        if month == '': date_act_form = "Проверьте корректность даты акта"
+        date_act_form = datetime.strptime(date_act_form, "%Y-%m-%d").date()  #перевод в тип даты
+        return date_act_form
+    else:
+        date_for_rename = '-'  # переменная для переименования акта
+        return -1
 
 # -----------------------------------------------поиск и запись всех путей файлов------------------------
 paths = []
@@ -122,7 +126,10 @@ for path in paths:
     #print('Дата акта -', date_act_f)
 
     project_act = mas_tables[0].cell(1, 1).text  # Наименование проекта
+    print(project_act)
     project_act = project_act[project_act.index('ПРОЕКТ: ')+8:len(project_act)+1]
+    project_act = project_act.replace('\n', ' ')
+    project_act = project_act.replace('ё', 'е')
     #key_project_act = mas_tables[2].cell(1, 2).text  # Ключ проекта
 
     period = mas_tables[0].cell(1, 3).text  # период
@@ -134,8 +141,11 @@ for path in paths:
     time_act = time_act[time_act.index('Отработано:') + 11:len(time_act) + 1]
 
     rate_act = mas_tables[0].cell(1, 5).text  # ставка в акте
-    rate_act = rate_act[rate_act.index('Ставка:') + 7:len(rate_act) + 1]
-
+    if rate_act.find('Ставка:') != -1:
+        rate_act = rate_act[rate_act.index('Ставка:') + 7:len(rate_act) + 1]
+    else:
+        rate_act = mas_tables[0].cell(1, 5).text
+    print(rate_act)
     rate_zayavka = mas_tables[2].cell(1, 1).text  # ставка в заявке
 
     project_cost_act = mas_tables[0].cell(1, 6).text  # стоимость по проекту
@@ -153,8 +163,8 @@ for path in paths:
     #name_act3 = mas_tables[6].cell(1, 1).text[3:len(mas_tables[3].cell(1, 1).text)]  # имя  в акте 3
 
 
-    print('Номер акта -', number_act)
-    print('Номер заявки -', number_zayavka)
+    #print('Номер акта -', number_act)
+    #print('Номер заявки -', number_zayavka)
     #print(date_act)  # Дата акта
     print('Наименование проекта -', project_act)  # Наименование проекта
     print('Ключ проекта -', key_project_act)  # Ключ проекта
@@ -194,6 +204,7 @@ for path in paths:
 
     name_act = full_name_act1[0:full_name_act1.rfind(' ')]
     name_act = name_act.replace(' ', '')
+    name_act = name_act.replace('ё', 'е')
     print('Имя в акте -', name_act)
 
     # -----------------------------------------------выделение суммы из текста акта------------------------
@@ -211,10 +222,11 @@ for path in paths:
 
     #number_act = mas_tables[0].cell(0, 0).text[-1]  # Номер акта
     number_act = text[0][text[0].index('АКТ  № ') + 7:len(text[0]) + 1]
+    print('Номер акта -', number_act)
 
     #number_zayavka = mas_tables[4].cell(0, 0).text[-1] # Номер заявки
     number_zayavka = text[19][text[19].index('Заявка на оказание услуг №') + 26:len(text[19]) + 1]
-
+    print('Номер заявки -', number_zayavka)
 # ---------------------------------- парсинг даты ---------------------------------------
     #date_act = mas_tables[1].cell(0, 1).text  # Дата акта
     index1 = 0
@@ -269,7 +281,7 @@ for path in paths:
         proj = jira.project(name_project)
         project_jira = proj.name
         print(proj.name)  # имя проекта
-        #print(issues_in_proj)
+        print(issues_in_proj)
 
         # ----------------------- поиск задач в которых есть ФИО-----------------------
         total_time_jira = 0
@@ -278,13 +290,15 @@ for path in paths:
 
             time = 0
             author = '-'
+
             #print(issues_in_proj[j])
             for i in range(len(x)):
                 author = x[i].updateAuthor.displayName
                 str = author.replace(" ", "")
+                str = str.replace("ё", "е")
                 index = x[i].started.split('T')  # разделение даты от времени
                 date_jira = datetime.strptime(index[0], "%Y-%m-%d")  # дата джиры
-
+                #print(author)
                 if str == name_user and date1 <= date_jira and date2 >= date_jira:
                     #print(x[i].started)
                     #print(index)
@@ -302,7 +316,7 @@ for path in paths:
         text_message = []
         text_message = verific(time_act, total_time_jira, project_act, project_jira, date_act_f, full_name_act1, name_act2, name_act3, number_act, number_zayavka, rate_act, rate_zayavka, cost_for_verification, project_cost_act, total_cost_act, total_cost_act_in_text, total_cost_zayavka)
     #----------------------------------------- создание отчета------------------------------------
-        report.create_report(date_act_f, number_act, number_zayavka, project_act, key_project_act, period, time_act, rate_act, rate_zayavka, project_cost_act, total_cost_act, total_cost_zayavka, total_cost_act_in_text, name_act2, name_act3, name_act, project_jira, date_start, date_end, total_time_jira, cost_for_verification, author)
+        report.create_report(date_act_f, number_act, number_zayavka, project_act, key_project_act, period, time_act, rate_act, rate_zayavka, project_cost_act, total_cost_act, total_cost_zayavka, total_cost_act_in_text, name_act2, name_act3, name_act, project_jira, date_start, date_end, total_time_jira, cost_for_verification, name_act)
     # ----------------------------------------- отправка сообщения ------------------------------------
         send_message(text_message[0], name_act, path, name_act2, number_act, date_for_rename, total_cost_act, text_message[1], type_of_act, project_act)
 
