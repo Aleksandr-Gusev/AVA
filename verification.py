@@ -5,6 +5,7 @@ def verific(time_act, total_time_jira, project_act, project_jira, date_act_f, fu
     global flag_OK
     flag_OK = 0             #флаг если все проверки успешны примет 1
     flag_time = 0
+    time_act = format(float(time_act), '.2f')
     if time_act == total_time_jira:
         flag_time = 1
         #text1 = 'Трудозатраты - Верно \n\n'

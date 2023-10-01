@@ -13,8 +13,8 @@ from email.mime.audio import MIMEAudio                    # Аудио
 
 def send_message(text, sub, path, name_act, number_act, date_act, total_cost, flag_OK, type_of_act, project_act):
     addr_from = "actbot@i-sol.ru"                       # Адресат
-    addr_to   = "aleksandr.gusev@i-sol.ru"                   # Получатель
-    #addr_to = "actbot@i-sol.ru"                             # Получатель
+    #addr_to   = "aleksandr.gusev@i-sol.ru"                   # Получатель
+    addr_to = "actbot@i-sol.ru"                             # Получатель
     password  = "Parol1!"                                  # Пароль
 
     msg = MIMEMultipart()                               # Создаем сообщение

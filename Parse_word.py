@@ -291,22 +291,22 @@ for path in paths:
             time = 0
             author = '-'
 
-            #print(issues_in_proj[j])
+            print(issues_in_proj[j])
             for i in range(len(x)):
                 author = x[i].updateAuthor.displayName
                 str = author.replace(" ", "")
                 str = str.replace("ё", "е")
                 index = x[i].started.split('T')  # разделение даты от времени
                 date_jira = datetime.strptime(index[0], "%Y-%m-%d")  # дата джиры
-                #print(author)
+                print(author)
                 if str == name_user and date1 <= date_jira and date2 >= date_jira:
                     #print(x[i].started)
-                    #print(index)
-                    #print(x[i].id)
-                    #print(x[i].timeSpentSeconds)
-                    #print(x[i].updateAuthor)
+                    print(index)
+                    print(x[i].id)
+                    print(x[i].timeSpentSeconds)
+                    print(x[i].updateAuthor)
                     time = x[i].timeSpentSeconds + time
-            #print(time/3600)
+            print(time/3600)
 
             total_time_jira = total_time_jira + time
 
