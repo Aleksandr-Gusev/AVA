@@ -11,8 +11,10 @@ from jira import JIRA
 from jira.client import ResultList
 from jira.resources import Issue
 import requests
-from datetime import datetime
+from datetime import datetime, timedelta, date
+
 from verification import verific
+
 # ---------------------------------------------- функция форматирования даты ------------------------------
 
 def check_structure_ip(name_ip):
@@ -252,6 +254,9 @@ for path in paths:
     date2 = date2.replace('.', '/')
     date1 = datetime.strptime(date1, "%d/%m/%Y")
     date2 = datetime.strptime(date2, "%d/%m/%Y")
+
+    datedelta = date.today() - timedelta(33)            # установка дельты для даты в - 35 дней для сокращения выгрузки данных из джира
+    datedelta = datedelta.strftime("%Y-%m-%d")
     # print(date1)
     # print(date2)
     # name_user = input('Введите Фамилию и Имя: \n')
@@ -275,13 +280,16 @@ for path in paths:
         n = all_project[p].name.replace(' ', '').lower()
         if pa == n:                                 #если наименование проекта найдено
             name_project = all_project[p].key
-
+    print(name_project)
+    #print(date.today() - timedelta(35))
     if name_project != '':                          #если наименование проекта найдено
-        issues_in_proj = jira.search_issues(f'project={name_project}', maxResults=350)
+        issues_in_proj = []
+        issues_in_proj = jira.search_issues(f'project={name_project} and updated > {datedelta}', maxResults=300)
         proj = jira.project(name_project)
         project_jira = proj.name
         print(proj.name)  # имя проекта
         print(issues_in_proj)
+        print(len(issues_in_proj))
 
         # ----------------------- поиск задач в которых есть ФИО-----------------------
         total_time_jira = 0
@@ -307,8 +315,10 @@ for path in paths:
                     print(x[i].updateAuthor)
                     time = x[i].timeSpentSeconds + time
             print(time/3600)
+            print(j)
 
             total_time_jira = total_time_jira + time
+
 
         total_time_jira = format(total_time_jira / 3600, '.2f')
         print('Трудозатраты в джире = ', total_time_jira)
