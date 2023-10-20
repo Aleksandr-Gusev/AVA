@@ -9,17 +9,39 @@ from email.mime.base import MIMEBase                      # Общий тип
 from email.mime.text import MIMEText                      # Текст/HTML
 from email.mime.image import MIMEImage                    # Изображения
 from email.mime.audio import MIMEAudio                    # Аудио
+from read_mail_in_date import object_senders
+from init import init_path, init_otladka
+
+def get_sender(path, obj):                      #Получение адресса почты кому отправить письмо
+    str = init_path()
+    name_doc = path.replace(str, '')
+    sender = ''
+    for key, value in obj.items():
+        if key == name_doc:
+            sender = value
+    return sender
+
 
 
 def send_message(text, sub, path, name_act, number_act, date_act, total_cost, flag_OK, type_of_act, project_act):
+
+    sender_email = get_sender(path, object_senders)  # почта отправителя
     addr_from = "actbot@i-sol.ru"                       # Адресат
-    #addr_to   = "aleksandr.gusev@i-sol.ru"                   # Получатель
-    addr_to = "actbot@i-sol.ru"                             # Получатель
+
+    if init_otladka() == '1':
+        addr_to = "aleksandr.gusev@i-sol.ru" + ',' + 'gusev.rpa@gmail.com'                 # Получатель
+        #addr_to = "actbot@i-sol.ru"                             # Получатель
+
+    """else:
+        addr_to = "aleksandr.gusev@i-sol.ru" """                       # Получатель
+        # addr_to = "actbot@i-sol.ru"                             # Получатель
+
     password  = "Parol1!"                                  # Пароль
 
     msg = MIMEMultipart()                               # Создаем сообщение
     msg['From'] = addr_from                          # Адресат
     msg['To'] = addr_to                            # Получатель
+
     if flag_OK == 1:
         msg['Subject'] = 'Акт согласован - ' + name_act + ' (' + project_act + ')'     # Тема сообщения
     else:
@@ -29,6 +51,9 @@ def send_message(text, sub, path, name_act, number_act, date_act, total_cost, fl
 
     filepath = path  # Имя файла в абсолютном или относительном формате
     filename = os.path.basename(filepath)  # Только имя файла
+
+
+    #print(get_sender(path, object_senders))
 
 
     ctype, encoding = mimetypes.guess_type(filepath)            # Определяем тип файла на основе его расширения

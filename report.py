@@ -2,12 +2,13 @@
 from openpyxl import load_workbook
 from datetime import date
 import time
+from init import init_path_report
 
 
 def create_report(arg2, arg3, arg4, arg5, arg6, arg7, arg9, arg10, arg11, arg12, arg13, arg14, arg15, arg16, arg17, arg18, arg20, arg21, arg22, arg23, arg24, arg25):
     # Load in the workbook
-    wb = load_workbook('C:\\Users\\Admin\\PycharmProjects\\AVA\\report.xlsx')
-
+    #wb = load_workbook('C:\\Users\\Admin\\PycharmProjects\\AVA\\report.xlsx')
+    wb = load_workbook(init_path_report())
     # Get sheet names
     #print(wb.get_sheet_names())
 

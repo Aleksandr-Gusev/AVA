@@ -32,6 +32,7 @@ from imbox import Imbox # pip install imbox
 import traceback
 from datetime import datetime
 import time
+from init import init_date
 
 mail_pass = "Parol1!"
 username = "actbot@i-sol.ru"
@@ -51,6 +52,7 @@ print(len(unread_msg_nums))
 
 #res, msg = imap.fetch(unread_msg_nums[0], '(RFC822)')  #Для метода search по порядковому номеру письма
 count = 1
+object_senders = {}         # словарь - имя файла:адрес почты
 for e_id in unread_msg_nums:
 
     res, msg = imap.fetch(e_id, '(RFC822)')  #Для метода search по порядковому номеру письма
@@ -72,7 +74,8 @@ for e_id in unread_msg_nums:
 
     date_str = time.strftime("%Y-%m-%d %H:%M:%S", date_msg)
     #date_today = datetime.today().strftime("%Y-%m-%d %H:%M:%S")
-    date_today = "2023-10-10 08:00:00"
+    #date_today = "2023-10-17 16:00:00"
+    date_today = init_date()            # получение даты из конфигурационного файла
 
     print(datetime.today())
 
@@ -92,13 +95,22 @@ for e_id in unread_msg_nums:
                 filename = decode_header(filename)[0][0].decode(decode_header(filename)[0][1])  #декодирование из base64 в utf-8
             if not filename:
                 filename = 'filename'
-
-            save_path = os.path.join('C:\\Users\\Admin\\PycharmProjects\\AVA\\Acts\\', f'{filename}_{count}.docx')
+            # ------------------- запись только с вложение .docx ----------------------------------
+            if filename.find('.docx') != -1:
+                object_senders[f'{count}_{filename}'] = email.utils.parseaddr(msg['From'])[1]
+            # -----------------------------------------------------
+            save_path = os.path.join('C:\\Users\\Admin\\PycharmProjects\\AVA\\Acts\\', f'{count}_{filename}')
+            #save_path = os.path.join('C:\\Users\\Admin\\PycharmProjects\\AVA\\Acts\\', f'{filename}_{count}.docx')
             with open(save_path, 'wb') as f:
                 f.write(part.get_payload(decode=True))
 
         #imap.store(e_id, '+FLAGS', '\Seen')
-        count +=1
+        count +=1                               # защита от совпадения имени
+
+print(object_senders)
+
+#import Parse_word                               # запуск модуля
+
 
 """print(email.utils.parsedate_tz(msg['Date']))
 

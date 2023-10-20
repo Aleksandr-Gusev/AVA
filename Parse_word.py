@@ -12,8 +12,8 @@ from jira.client import ResultList
 from jira.resources import Issue
 import requests
 from datetime import datetime, timedelta, date
-
 from verification import verific
+from init import init_path
 
 # ---------------------------------------------- функция форматирования даты ------------------------------
 
@@ -73,13 +73,13 @@ def formating_date (stroka):
 
 # -----------------------------------------------поиск и запись всех путей файлов------------------------
 paths = []
-folder = os.path.dirname('C:\\Users\\Admin\\PycharmProjects\\AVA\\Acts')
+folder = os.path.dirname(init_path())  # получение пути из функции инициализации конфигурационного файла
 for root, dirs, files in os.walk(folder):
     for file in files:
         if file.endswith('docx') and not file.startswith('~'):
             paths.append(os.path.join(root, file))
 print('Всего актов', len(paths))
-#print(paths)
+print(paths)
 
 # -----------------------------------------------создание экземпляра документа------------------------
 for path in paths:
