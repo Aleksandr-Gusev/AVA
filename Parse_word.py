@@ -1,4 +1,7 @@
 from __future__ import annotations
+
+import sys
+
 import docx
 import os
 import json
@@ -80,6 +83,9 @@ for root, dirs, files in os.walk(folder):
             paths.append(os.path.join(root, file))
 print('Всего актов', len(paths))
 print(paths)
+if len(paths) == 0:
+    print('в дирректории нет ни одного акта для проверки')
+    sys.exit()
 
 # -----------------------------------------------создание экземпляра документа------------------------
 for path in paths:

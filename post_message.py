@@ -29,11 +29,11 @@ def send_message(text, sub, path, name_act, number_act, date_act, total_cost, fl
     addr_from = "actbot@i-sol.ru"                       # Адресат
 
     if init_otladka() == '1':
-        addr_to = "aleksandr.gusev@i-sol.ru" + ',' + 'gusev.rpa@gmail.com'                 # Получатель
+        addr_to = "aleksandr.gusev@i-sol.ru"              # Получатели
         #addr_to = "actbot@i-sol.ru"                             # Получатель
 
-    """else:
-        addr_to = "aleksandr.gusev@i-sol.ru" """                       # Получатель
+    else:
+        addr_to = "aleksandr.gusev@i-sol.ru" + ',' + f'{sender_email}'
         # addr_to = "actbot@i-sol.ru"                             # Получатель
 
     password  = "Parol1!"                                  # Пароль
