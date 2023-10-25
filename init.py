@@ -55,9 +55,9 @@ mas.insert(1, init_date())
 mas.insert(2, init_otladka())
 mas.append(init_email_send())
 
-print(mas)
+#print(mas)
 
-print(mas[3][0])
+#print(mas[3][0])
 """path = init()[0]
 date = init()[1]
 print(path)

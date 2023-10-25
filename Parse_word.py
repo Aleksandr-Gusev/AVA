@@ -75,20 +75,24 @@ def formating_date (stroka):
         return -1
 
 # -----------------------------------------------поиск и запись всех путей файлов------------------------
+
 paths = []
 folder = os.path.dirname(init_path())  # получение пути из функции инициализации конфигурационного файла
 for root, dirs, files in os.walk(folder):
     for file in files:
         if file.endswith('docx') and not file.startswith('~'):
             paths.append(os.path.join(root, file))
-print('Всего актов', len(paths))
-print(paths)
+#print('Всего актов', len(paths))
+#print(paths)
+#----------------------завершение работы при отсутствии актов----------------------------
 if len(paths) == 0:
     print('в дирректории нет ни одного акта для проверки')
+    input("Нажмите enter для завершения...")
     sys.exit()
 
 # -----------------------------------------------создание экземпляра документа------------------------
 for path in paths:
+    print(f'>>> Получение данных из акта {path}...')
     doc = docx.Document(path)
     properties = doc.core_properties
     """print('Автор документа:', properties.author)
@@ -134,7 +138,7 @@ for path in paths:
     #print('Дата акта -', date_act_f)
 
     project_act = mas_tables[0].cell(1, 1).text  # Наименование проекта
-    print(project_act)
+    #print(project_act)
     project_act = project_act[project_act.index('ПРОЕКТ: ')+8:len(project_act)+1]
     project_act = project_act.replace('\n', ' ')
     project_act = project_act.replace('ё', 'е')
@@ -153,7 +157,7 @@ for path in paths:
         rate_act = rate_act[rate_act.index('Ставка:') + 7:len(rate_act) + 1]
     else:
         rate_act = mas_tables[0].cell(1, 5).text
-    print(rate_act)
+    #print(rate_act)
     rate_zayavka = mas_tables[2].cell(1, 1).text  # ставка в заявке
 
     project_cost_act = mas_tables[0].cell(1, 6).text  # стоимость по проекту
@@ -174,17 +178,17 @@ for path in paths:
     #print('Номер акта -', number_act)
     #print('Номер заявки -', number_zayavka)
     #print(date_act)  # Дата акта
-    print('Наименование проекта -', project_act)  # Наименование проекта
-    print('Ключ проекта -', key_project_act)  # Ключ проекта
-    print('Период проверки -', period)  # период
+    #print('Наименование проекта -', project_act)  # Наименование проекта
+    #print('Ключ проекта -', key_project_act)  # Ключ проекта
+    #print('Период проверки -', period)  # период
     #print('Начало периода', date_start)
     #print('Конец периода', date_end)
-    print('Трудозатраты в акте -', time_act)  # трудозатраты
-    print('Ставка в акте -', rate_act)  # ставка в Акте
-    print('Ставка в заявке -', rate_zayavka)  # ставка в заявке
-    print('Стоимость по проекту -', project_cost_act)  # стоимость по проекту
-    print('Итого в таблице -', total_cost_act)  # Итого
-    print('Итого в заявке -', total_cost_zayavka)
+    #print('Трудозатраты в акте -', time_act)  # трудозатраты
+    #print('Ставка в акте -', rate_act)  # ставка в Акте
+    #print('Ставка в заявке -', rate_zayavka)  # ставка в заявке
+    #print('Стоимость по проекту -', project_cost_act)  # стоимость по проекту
+    #print('Итого в таблице -', total_cost_act)  # Итого
+    #print('Итого в заявке -', total_cost_zayavka)
     #print('Имя в подписи 1 -', name_act2)
     #print('Имя в подписи 2 -', name_act3)
 
@@ -213,7 +217,7 @@ for path in paths:
     name_act = full_name_act1[0:full_name_act1.rfind(' ')]
     name_act = name_act.replace(' ', '')
     name_act = name_act.replace('ё', 'е')
-    print('Имя в акте -', name_act)
+    #print('Имя в акте -', name_act)
 
     # -----------------------------------------------выделение суммы из текста акта------------------------
 
@@ -224,17 +228,17 @@ for path in paths:
     #print(copeyka)
 
     total_cost_act_in_text = rub + ',' + copeyka   # полная сумма
-    print('Итого в тексте -', total_cost_act_in_text)
+    #print('Итого в тексте -', total_cost_act_in_text)
 
 #----------------------------------------------------- выделение из текста ---------------------
 
     #number_act = mas_tables[0].cell(0, 0).text[-1]  # Номер акта
     number_act = text[0][text[0].index('АКТ  № ') + 7:len(text[0]) + 1]
-    print('Номер акта -', number_act)
+    #print('Номер акта -', number_act)
 
     #number_zayavka = mas_tables[4].cell(0, 0).text[-1] # Номер заявки
     number_zayavka = text[19][text[19].index('Заявка на оказание услуг №') + 26:len(text[19]) + 1]
-    print('Номер заявки -', number_zayavka)
+    #print('Номер заявки -', number_zayavka)
 # ---------------------------------- парсинг даты ---------------------------------------
     #date_act = mas_tables[1].cell(0, 1).text  # Дата акта
     index1 = 0
@@ -249,8 +253,9 @@ for path in paths:
     date_act = text[2][index1-1:len(text[2])]
     date_act_f=formating_date(date_act)       #форматированная дата
     # print('Дата акта -', date_act_f)
-
+    print('OK')
 # --------------------------------------- Запуск модуля jira---------------------------------
+    print('>>> Подключение к JIRA...')
     jira = JIRA(server='https://jira.i-sol.eu', basic_auth=('tcontrol', '1J*iBJGT'))
 
     # ------------------------ Ввод ФИО---------------------
@@ -267,8 +272,9 @@ for path in paths:
     # print(date2)
     # name_user = input('Введите Фамилию и Имя: \n')
 
-
+    print('OK')
 #--------------------------------- проверка есть внутри ИП другие участники -----------------------
+    print('>>> Выгрузка дынных из JIRA...')
     new_name = check_structure_ip(full_name_act1)
     if new_name == 'нет совпадения':  # проверяем есть ли ФИО в базе ИП и переключаемся на другое ФИО если находим
         name_user = name_act
@@ -293,9 +299,9 @@ for path in paths:
         issues_in_proj = jira.search_issues(f'project={name_project} and updated > {datedelta}', maxResults=300)
         proj = jira.project(name_project)
         project_jira = proj.name
-        print(proj.name)  # имя проекта
-        print(issues_in_proj)
-        print(len(issues_in_proj))
+        #print(proj.name)  # имя проекта
+        #print(issues_in_proj)
+        #print(len(issues_in_proj))
 
         # ----------------------- поиск задач в которых есть ФИО-----------------------
         total_time_jira = 0
@@ -305,38 +311,45 @@ for path in paths:
             time = 0
             author = '-'
 
-            print(issues_in_proj[j])
+            #print(issues_in_proj[j])
             for i in range(len(x)):
                 author = x[i].updateAuthor.displayName
                 str = author.replace(" ", "")
                 str = str.replace("ё", "е")
                 index = x[i].started.split('T')  # разделение даты от времени
                 date_jira = datetime.strptime(index[0], "%Y-%m-%d")  # дата джиры
-                print(author)
+                #print(author)
                 if str == name_user and date1 <= date_jira and date2 >= date_jira:
                     #print(x[i].started)
-                    print(index)
-                    print(x[i].id)
-                    print(x[i].timeSpentSeconds)
-                    print(x[i].updateAuthor)
+                    #print(index)
+                    #print(x[i].id)
+                    #print(x[i].timeSpentSeconds)
+                    #print(x[i].updateAuthor)
                     time = x[i].timeSpentSeconds + time
-            print(time/3600)
-            print(j)
+            #print(time/3600)
+            #print(j)
 
             total_time_jira = total_time_jira + time
 
 
         total_time_jira = format(total_time_jira / 3600, '.2f')
         print('Трудозатраты в джире = ', total_time_jira)
+        print('OK')
     # ----------------------------------------- проверка данных ------------------------------------
+        print('>>> Проверка данных...')
         text_message = []
         text_message = verific(time_act, total_time_jira, project_act, project_jira, date_act_f, full_name_act1, name_act2, name_act3, number_act, number_zayavka, rate_act, rate_zayavka, cost_for_verification, project_cost_act, total_cost_act, total_cost_act_in_text, total_cost_zayavka, date1, date2)
+        print('ОК')
     #----------------------------------------- создание отчета------------------------------------
         report.create_report(date_act_f, number_act, number_zayavka, project_act, key_project_act, period, time_act, rate_act, rate_zayavka, project_cost_act, total_cost_act, total_cost_zayavka, total_cost_act_in_text, name_act2, name_act3, name_act, project_jira, date_start, date_end, total_time_jira, cost_for_verification, name_act)
     # ----------------------------------------- отправка сообщения ------------------------------------
+        print('>>> Отправка сообщения...')
         send_message(text_message[0], name_act, path, name_act2, number_act, date_for_rename, total_cost_act, text_message[1], type_of_act, project_act)
-
+        print('ОК')
     if name_project == '':  # если наименование проекта не найдено
         send_message('Завершена роботизированная проверка акта и заявки.\nРезультат обработки:'+ '\n\n' +
                      '     Проект, указанный в акте, не найден в JIRA. Проверьте, пожалуйста, верно ли указано наименование проекта в акте.' + '\n\n' +
                      'Акт и заявка во вложении. Просьба проверить документы в соответствии с замечаниями и направить повторно на проверку на электронный адрес actbot@i-sol.ru', '', path, '', '', '', '', 0, '', '')
+        print('>>> Проект не найден, сообщение отправлено')
+
+input("Нажмите enter для завершения...")
