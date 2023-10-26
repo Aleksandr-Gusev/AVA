@@ -17,6 +17,8 @@ import requests
 from datetime import datetime, timedelta, date
 from verification import verific
 from init import init_path
+import time
+from tqdm import tqdm   # установить
 
 # ---------------------------------------------- функция форматирования даты ------------------------------
 
@@ -215,8 +217,12 @@ for path in paths:
     #print(full_name_act1)
 
     name_act = full_name_act1[0:full_name_act1.rfind(' ')]
+    mas_FI = name_act.split()
+    name_act_name_first = mas_FI[1]+mas_FI[0]
     name_act = name_act.replace(' ', '')
     name_act = name_act.replace('ё', 'е')
+    name_act_name_first = name_act_name_first.replace(' ', '')
+    name_act_name_first = name_act_name_first.replace('ё', 'е')
     #print('Имя в акте -', name_act)
 
     # -----------------------------------------------выделение суммы из текста акта------------------------
@@ -292,7 +298,7 @@ for path in paths:
         n = all_project[p].name.replace(' ', '').lower()
         if pa == n:                                 #если наименование проекта найдено
             name_project = all_project[p].key
-    print(name_project)
+    #print(name_project)
     #print(date.today() - timedelta(35))
     if name_project != '':                          #если наименование проекта найдено
         issues_in_proj = []
@@ -305,31 +311,33 @@ for path in paths:
 
         # ----------------------- поиск задач в которых есть ФИО-----------------------
         total_time_jira = 0
-        for j in range(len(issues_in_proj)):
+        for j in tqdm(range(len(issues_in_proj))):    #tqdm это для прогресс бара
+            time.sleep(0.01)
             x = jira.worklogs(issue=issues_in_proj[j])
 
-            time = 0
+            time1 = 0
             author = '-'
 
             #print(issues_in_proj[j])
             for i in range(len(x)):
+
                 author = x[i].updateAuthor.displayName
                 str = author.replace(" ", "")
                 str = str.replace("ё", "е")
                 index = x[i].started.split('T')  # разделение даты от времени
                 date_jira = datetime.strptime(index[0], "%Y-%m-%d")  # дата джиры
                 #print(author)
-                if str == name_user and date1 <= date_jira and date2 >= date_jira:
+                if (str == name_user or str == name_act_name_first) and date1 <= date_jira and date2 >= date_jira:
                     #print(x[i].started)
                     #print(index)
                     #print(x[i].id)
                     #print(x[i].timeSpentSeconds)
                     #print(x[i].updateAuthor)
-                    time = x[i].timeSpentSeconds + time
+                    time1 = x[i].timeSpentSeconds + time1
             #print(time/3600)
             #print(j)
 
-            total_time_jira = total_time_jira + time
+            total_time_jira = total_time_jira + time1
 
 
         total_time_jira = format(total_time_jira / 3600, '.2f')

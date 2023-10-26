@@ -8,6 +8,7 @@ from imbox import Imbox # pip install imbox
 import traceback
 from datetime import datetime
 import time
+from tqdm import tqdm   # установить
 from init import init_date
 
 
@@ -31,9 +32,11 @@ print('>>> Проверка электронной почты и выгрузк�
 
 #res, msg = imap.fetch(unread_msg_nums[0], '(RFC822)')  #Для метода search по порядковому номеру письма
 count = 1
-object_senders = {}         # словарь - имя файла:адрес почты
-for e_id in unread_msg_nums:
 
+object_senders = {}         # словарь - имя файла:адрес почты
+for e_id in tqdm(unread_msg_nums):
+    #tqdm(count_progress)
+    time.sleep(0.01)
     res, msg = imap.fetch(e_id, '(RFC822)')  #Для метода search по порядковому номеру письма
 
     #letter_date = email.utils.parsedate_tz(msg["Date"]) # дата получения, приходит в виде строк
@@ -84,6 +87,6 @@ for e_id in unread_msg_nums:
         count +=1                               # защита от совпадения имени
 
 #print(object_senders)
-print('OK')
+#print('OK')
 #import Parse_word                               # запуск модуля
 
