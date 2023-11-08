@@ -51,7 +51,11 @@ for e_id in tqdm(unread_msg_nums):
     #print(email.utils.parsedate(msg['Date']))
     date_msg = email.utils.parsedate(msg['Date'])
 
+
+    #date_msg = email.utils.parsedate_to_datetime(msg['Date'])
     date_str = time.strftime("%Y-%m-%d %H:%M:%S", date_msg)
+    date_str2 = time.strftime("%Y-%m-%d", date_msg)                             # для типизирования
+    date_for_second_verific = datetime.strptime(date_str2, "%Y-%m-%d").date()  # переменная для проверки даты акта и даты прихода письма на почту
     #date_today = datetime.today().strftime("%Y-%m-%d %H:%M:%S")
     #date_today = "2023-10-17 16:00:00"
     date_today = init_date()            # получение даты из конфигурационного файла

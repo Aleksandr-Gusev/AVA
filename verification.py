@@ -1,6 +1,7 @@
 from datetime import date
 
-def verific(time_act, total_time_jira, project_act, project_jira, date_act_f, full_name_act1, name_act2, name_act3, number_act, number_zayavka, rate_act, rate_zayavka, cost_for_verification, project_cost_act, total_cost_act, total_cost_act_in_text, total_cost_zayavka, date1, date2):
+
+def verific(time_act, total_time_jira, project_act, project_jira, date_act_f, full_name_act1, name_act2, name_act3, number_act, number_zayavka, rate_act, rate_zayavka, cost_for_verification, project_cost_act, total_cost_act, total_cost_act_in_text, total_cost_zayavka, date1, date2, date_for_second_verific):
     global flag_time
     global flag_OK
     flag_OK = 0             #флаг если все проверки успешны примет 1
@@ -32,7 +33,7 @@ def verific(time_act, total_time_jira, project_act, project_jira, date_act_f, fu
     curent_date = date.today()
 
     if date_act_f != -1:
-        if date_act_f == curent_date:
+        if date_act_f == curent_date or date_act_f == date_for_second_verific:
             flag_date_act = 1
             #text3 = 'Дата акта - Верно \n\n'
             text3 = ''

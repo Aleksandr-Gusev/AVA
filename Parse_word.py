@@ -19,6 +19,7 @@ from verification import verific
 from init import init_path
 import time
 from tqdm import tqdm   # установить
+from read_mail_in_date import date_for_second_verific
 
 # ---------------------------------------------- функция форматирования даты ------------------------------
 
@@ -346,7 +347,7 @@ for path in paths:
     # ----------------------------------------- проверка данных ------------------------------------
         print('>>> Проверка данных...')
         text_message = []
-        text_message = verific(time_act, total_time_jira, project_act, project_jira, date_act_f, full_name_act1, name_act2, name_act3, number_act, number_zayavka, rate_act, rate_zayavka, cost_for_verification, project_cost_act, total_cost_act, total_cost_act_in_text, total_cost_zayavka, date1, date2)
+        text_message = verific(time_act, total_time_jira, project_act, project_jira, date_act_f, full_name_act1, name_act2, name_act3, number_act, number_zayavka, rate_act, rate_zayavka, cost_for_verification, project_cost_act, total_cost_act, total_cost_act_in_text, total_cost_zayavka, date1, date2, date_for_second_verific)
         print('ОК')
     #----------------------------------------- создание отчета------------------------------------
         report.create_report(date_act_f, number_act, number_zayavka, project_act, key_project_act, period, time_act, rate_act, rate_zayavka, project_cost_act, total_cost_act, total_cost_zayavka, total_cost_act_in_text, name_act2, name_act3, name_act, project_jira, date_start, date_end, total_time_jira, cost_for_verification, name_act)

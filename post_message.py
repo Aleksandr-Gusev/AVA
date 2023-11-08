@@ -1,6 +1,7 @@
 
 import smtplib                                      # Импортируем библиотеку по работе с SMTP
 import os
+import time
 # Добавляем необходимые подклассы - MIME-типы
 from email.mime.multipart import MIMEMultipart      # Многокомпонентный объект
 import mimetypes                                          # Импорт класса для обработки неизвестных MIME-типов, базирующихся на расширении файла
@@ -10,7 +11,7 @@ from email.mime.text import MIMEText                      # Текст/HTML
 from email.mime.image import MIMEImage                    # Изображения
 from email.mime.audio import MIMEAudio                    # Аудио
 from read_mail_in_date import object_senders
-from init import init_path, init_otladka
+from init import init_path, init_otladka, init_email_send
 
 def get_sender(path, obj):                      #Получение адресса почты кому отправить письмо
     str = init_path()
@@ -29,13 +30,13 @@ def send_message(text, sub, path, name_act, number_act, date_act, total_cost, fl
     addr_from = "actbot@i-sol.ru"                       # Адресат
 
     if init_otladka() == '1':
-        addr_to = "aleksandr.gusev@i-sol.ru"              # Получатели
-        #addr_to = "actbot@i-sol.ru"                             # Получатель
+        #addr_to = "aleksandr.gusev@i-sol.ru"              # Получатели
+        addr_to = "actbot@i-sol.ru"                             # Получатель
 
     else:
-        addr_to = "aleksandr.gusev@i-sol.ru" + ',' + f'{sender_email}'
+        addr_to = "actbot@i-sol.ru" + ',' + f'{sender_email}' + ',' + f'{init_email_send()[0]}' + ',' + f'{init_email_send()[1]}' + ',' + f'{init_email_send()[2]}'
         # addr_to = "actbot@i-sol.ru"                             # Получатель
-
+    time.sleep(2)                                           #Задержка
     password  = "Parol1!"                                  # Пароль
 
     msg = MIMEMultipart()                               # Создаем сообщение
@@ -85,3 +86,6 @@ def send_message(text, sub, path, name_act, number_act, date_act, total_cost, fl
     server.login(addr_from, password)                       # Получаем доступ
     server.send_message(msg)                                # Отправляем сообщение
     server.quit()                                           # Выходим
+    time.sleep(3)                                           # Задержка
+    os.remove(filepath)                                     # удаление акта после отправки
+
