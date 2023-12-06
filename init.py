@@ -48,6 +48,8 @@ def init_email_send():
 
     return mas_email
 
+#def record_new_date():
+
 mas = []
 
 mas.insert(0, init_path())

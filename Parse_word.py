@@ -273,7 +273,7 @@ for path in paths:
     date1 = datetime.strptime(date1, "%d/%m/%Y")
     date2 = datetime.strptime(date2, "%d/%m/%Y")
 
-    datedelta = date.today() - timedelta(33)            # установка дельты для даты в - 35 дней для сокращения выгрузки данных из джира
+    datedelta = date.today() - timedelta(70)            # установка дельты для даты в днях для сокращения выгрузки данных из джира
     datedelta = datedelta.strftime("%Y-%m-%d")
     # print(date1)
     # print(date2)
@@ -299,7 +299,7 @@ for path in paths:
         n = all_project[p].name.replace(' ', '').lower()
         if pa == n:                                 #если наименование проекта найдено
             name_project = all_project[p].key
-    #print(name_project)
+    print(name_project)
     #print(date.today() - timedelta(35))
     if name_project != '':                          #если наименование проекта найдено
         issues_in_proj = []
@@ -335,7 +335,7 @@ for path in paths:
                     #print(x[i].timeSpentSeconds)
                     #print(x[i].updateAuthor)
                     time1 = x[i].timeSpentSeconds + time1
-            #print(time/3600)
+            #print(time1/3600)
             #print(j)
 
             total_time_jira = total_time_jira + time1

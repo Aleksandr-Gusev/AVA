@@ -33,7 +33,7 @@ def verific(time_act, total_time_jira, project_act, project_jira, date_act_f, fu
     curent_date = date.today()
 
     if date_act_f != -1:
-        if date_act_f == curent_date or date_act_f == date_for_second_verific:
+        if date_act_f == curent_date or date_act_f == date_for_second_verific:   # вторая проверка для актов, которые исполнитель прислал в нужный день, а бот запустили на следующий день
             flag_date_act = 1
             #text3 = 'Дата акта - Верно \n\n'
             text3 = ''
