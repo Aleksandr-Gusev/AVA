@@ -16,10 +16,10 @@ from jira.resources import Issue
 import requests
 from datetime import datetime, timedelta, date
 from verification import verific
-from init import init_path
+from init import init_path, update_time
 import time
 from tqdm import tqdm   # установить
-from read_mail_in_date import date_for_second_verific
+from read_mail_in_date import date_for_second_verific, date_str
 
 # ---------------------------------------------- функция форматирования даты ------------------------------
 
@@ -355,10 +355,13 @@ for path in paths:
         print('>>> Отправка сообщения...')
         send_message(text_message[0], name_act, path, name_act2, number_act, date_for_rename, total_cost_act, text_message[1], type_of_act, project_act)
         print('ОК')
+        #------------------------ перезапись даты и времени в json ------------------------------
+        update_time(date_str)
     if name_project == '':  # если наименование проекта не найдено
         send_message('Завершена роботизированная проверка акта и заявки.\nРезультат обработки:'+ '\n\n' +
                      '     Проект, указанный в акте, не найден в JIRA. Проверьте, пожалуйста, верно ли указано наименование проекта в акте.' + '\n\n' +
                      'Акт и заявка во вложении. Просьба проверить документы в соответствии с замечаниями и направить повторно на проверку на электронный адрес actbot@i-sol.ru', '', path, '', '', '', '', 0, '', '')
         print('>>> Проект не найден, сообщение отправлено')
-
+        # ------------------------ перезапись даты и времени в json ------------------------------
+        update_time(date_str)
 input("Нажмите enter для завершения...")

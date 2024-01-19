@@ -1,5 +1,6 @@
 
 import json
+from datetime import datetime, timedelta
 
 def init_path():
 
@@ -47,6 +48,20 @@ def init_email_send():
     mas_email.append(data["email3"])
 
     return mas_email
+
+def update_time(date_message):
+    with open('config.json', 'r', encoding='utf-8') as f: # открытие файла для чтения
+        data = json.load(f) # чтение данных из файла в формате JSON в объект Python
+
+    dt = datetime.strptime(date_message, '%Y-%m-%d %H:%M:%S')
+    dt = dt + timedelta(seconds=5)
+    date_message = datetime.strftime(dt, '%Y-%m-%d %H:%M:%S')
+    data["Date"] = date_message
+
+    with open('config.json', 'w') as f:
+        json.dump(data, f)
+
+
 
 #def record_new_date():
 
